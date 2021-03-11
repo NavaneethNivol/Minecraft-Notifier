@@ -27,20 +27,21 @@ socket.on('connect', function () {
 
     socket.on('login', function (data) {
         console.log(`${data.player} Joined the game.`);
-        new Notification(`${data.player} Joined the game.`, {
-            body: 'Lets catch up?' 
+        new window.Notification(`${data.player} Joined the game.`, {
+            body: 'Lets catch up?'
         });
     });
 
     socket.on('logout', function (data) {
         console.log(`${data.player} Left the game.`);
-        new Notification(`${data.player} Left the game.`, {
+        new window.Notification(`${data.player} Left the game.`, {
             body: ':('
         });
     });
 
     socket.on('players', function (players) {
         console.log(`Online Players: ${players.filter(x => x.name)}`);
+
         message2UI('players', { players: players });
     });
 
@@ -50,10 +51,10 @@ socket.on('connect', function () {
 socket.on('disconnect', (err) => {
     console.log('Disconnected from Minecraft Server.');
     message2UI('server-status', { status: false });
-    new Notification(`Minecraft Server went offline`, {
+    new window.Notification(`Minecraft Server went offline`, {
         body: '*_*'
     });
-    if(err) {
+    if (err) {
         console.log(err);
     }
 });
