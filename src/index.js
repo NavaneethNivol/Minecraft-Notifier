@@ -158,7 +158,7 @@ function updateMenu() {
     if (server_status) {
       items.push({
         label: 'Players',
-        submenu: [{ label: 'No Active players.', enabled: false }]
+        submenu: [{ label: 'No active players.', enabled: false }]
       });
     }
     else {

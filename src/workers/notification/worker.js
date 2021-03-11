@@ -27,8 +27,13 @@ socket.on('connect', function () {
 
     socket.on('login', function (data) {
         console.log(`${data.player} Joined the game.`);
+
+        var taglines = [
+            'Lets catch up?',
+            'Wanna play?'
+        ]
         new window.Notification(`${data.player} Joined the game.`, {
-            body: 'Lets catch up?'
+            body: taglines[[Math.floor(Math.random() * taglines.length)]]
         });
     });
 

@@ -1,5 +1,6 @@
 const { ipcRenderer } = require('electron');
 
+var players = [];
 
 ipcRenderer.on('message-from-notification-worker', (event, arg) => {
 
@@ -19,28 +20,59 @@ ipcRenderer.on('message-from-notification-worker', (event, arg) => {
     }
     else if (arg.command == 'players') {
 
-        let players = arg.payload.players;
+        players = arg.payload.players;
 
         document.querySelector('.player-count').innerHTML = players.length;
         document.querySelector('.players').innerHTML = ""
-    
+
         players.forEach(player => {
-    
+
             let diff = new Date() - new Date(player.timestamp);
             let minutes = Math.floor((diff / 1000) / 60);
-    
+
             let stats = '';
-    
+
             if (minutes < 1) {
                 stats = 'Just Now';
             }
             else {
                 stats = minutes + ' Min';
             }
-    
+
             document.querySelector('.players').innerHTML += '<div class = "card">' + '<p>' + player.name + '</p>' + '<p>' + stats + '</p>' + '</div>';
         });
 
     }
 
 });
+
+
+function updatePlayersTimestamps() {
+
+    if (players.length > 0) {
+
+        document.querySelector('.player-count').innerHTML = players.length;
+        document.querySelector('.players').innerHTML = ""
+
+        players.forEach(player => {
+
+            let diff = new Date() - new Date(player.timestamp);
+            let minutes = Math.floor((diff / 1000) / 60);
+
+            let stats = '';
+
+            if (minutes < 1) {
+                stats = 'Just Now';
+            }
+            else {
+                stats = minutes + ' Min';
+            }
+
+            document.querySelector('.players').innerHTML += '<div class = "card">' + '<p>' + player.name + '</p>' + '<p>' + stats + '</p>' + '</div>';
+        });
+    }
+
+    setTimeout(updatePlayersTimestamps, 1000);
+}
+
+updatePlayersTimestamps();
