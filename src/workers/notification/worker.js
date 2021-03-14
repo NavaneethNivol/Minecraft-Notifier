@@ -32,6 +32,7 @@ socket.on('connect', function () {
             'Lets catch up?',
             'Wanna play?'
         ]
+
         new window.Notification(`${data.player} Joined the game.`, {
             body: taglines[[Math.floor(Math.random() * taglines.length)]]
         });
@@ -50,15 +51,46 @@ socket.on('connect', function () {
         message2UI('players', { players: players });
     });
 
+    socket.on('backup', function (data) {
+
+        var body = '';
+        var title = '';
+
+        var taglines = [
+            'Hang tight',
+            'Hold still',
+            'Just bear with me',
+            'Wait a little',
+            'Be patient',
+            'Just a minute',
+            'Sit tight',
+            'Please wait'
+        ]
+
+        if (!data.done) {
+            title = "Automatic backup has started";
+            body = taglines[[Math.floor(Math.random() * taglines.length)]];
+        }
+        else if(data.done && data.status == 'completed') {
+            title = "Backup Completed";
+            body = data.backup_name;
+        }
+        else if (data.done && data.status == 'failed') {
+            title = "Backup Failed";
+            body = data.error;
+        }
+
+        new window.Notification(title, {
+            body: body
+        });
+
+    });
 });
 
 
 socket.on('disconnect', (err) => {
     console.log('Disconnected from Minecraft Server.');
     message2UI('server-status', { status: false });
-    new window.Notification(`Minecraft Server went offline`, {
-        body: '*_*'
-    });
     if (err) {
         console.log(err);
     }

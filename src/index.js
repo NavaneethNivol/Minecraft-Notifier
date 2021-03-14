@@ -2,9 +2,11 @@ const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron');
 const path = require('path');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
+if (require('electron-squirrel-startup')) {
+  // eslint-disable-line global-require
   app.quit();
 }
+
 
 function sendWindowMessage(targetWindow, message, payload) {
   if (typeof targetWindow === 'undefined') {
@@ -18,7 +20,9 @@ function sendWindowMessage(targetWindow, message, payload) {
 let mainWindow, workerWindow, tray;
 let force_quit = false;
 let server_status = false;
+let backup_inprogress = false;
 let active_players = [];
+
 
 const createWindow = () => {
 
@@ -55,7 +59,7 @@ const createWindow = () => {
 
   // mainWindow.webContents.openDevTools();
 
-  // Notification Worker
+  // ---------------------- Notification Worker ---------------------- //
 
   workerWindow = new BrowserWindow({
     show: false,
@@ -66,8 +70,6 @@ const createWindow = () => {
   });
 
   workerWindow.loadFile(path.join(__dirname, 'worker.html'));
-
-  // workerWindow.webContents.openDevTools();
 
   ipcMain.on('message-from-notification-worker', (event, arg) => {
 
@@ -83,13 +85,21 @@ const createWindow = () => {
     else if (arg.command == 'players') {
       active_players = arg.payload.players;
     }
-
-    if (arg.command == 'server-status') {
+    else if (arg.command == 'server-status') {
       if (arg.payload.status) {
         server_status = true;
       }
       else {
         server_status = false;
+      }
+    }
+    else if (arg.command == 'backup') {
+
+      if (arg.payload.done) {
+        backup_inprogress = false;
+      }
+      else {
+        backup_inprogress = true;
       }
     }
 
@@ -101,10 +111,6 @@ const createWindow = () => {
   tray = new Tray(path.join(app.getAppPath(), 'src/images/offline.png'));
 
   tray.setToolTip('Minecraft Notifier')
-
-  if (process.platform === 'win32') {
-    tray.on('click', tray.popUpContextMenu);
-  }
 
   updateMenu();
 
@@ -130,6 +136,13 @@ function updateMenu() {
 
     items.push({
       label: 'Server is Offline',
+      enabled: false
+    });
+  }
+
+  if (backup_inprogress) {
+    items.push({
+      label: 'Backup is in progress...',
       enabled: false
     });
   }
@@ -182,6 +195,11 @@ function updateMenu() {
 
   const contextMenu = Menu.buildFromTemplate(items);
   tray.setContextMenu(contextMenu);
+
+  if (process.platform === 'win32') {
+    tray.on('click', tray.popUpContextMenu(contextMenu));
+  }
+
 }
 
 
