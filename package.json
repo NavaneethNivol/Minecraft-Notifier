@@ -20,8 +20,8 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "src/icons/mac/icon.icns",
-        "name": "Minecraft Notifier"
+        "name": "Minecraft Notifier",
+        "icon": "src/icons/mac/icon.icns"
       },
       "makers": [
         {
@@ -33,7 +33,9 @@
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "darwin"
+            "darwin",
+            "win32",
+            "linux"
           ]
         },
         {

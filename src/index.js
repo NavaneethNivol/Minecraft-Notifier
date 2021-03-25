@@ -69,6 +69,8 @@ const createWindow = () => {
     }
   });
 
+  workerWindow.webContents.openDevTools();
+
   workerWindow.loadFile(path.join(__dirname, 'worker.html'));
 
   ipcMain.on('message-from-notification-worker', (event, arg) => {
@@ -83,7 +85,7 @@ const createWindow = () => {
       }
     }
     else if (arg.command == 'players') {
-      active_players = arg.payload.players;
+      active_players = arg.payload.players || [];
     }
     else if (arg.command == 'server-status') {
       if (arg.payload.status) {
@@ -182,6 +184,24 @@ function updateMenu() {
     }
   }
 
+  items.push({
+    label: 'Request Backup',
+    enabled: false,
+    click() {
+      // sendWindowMessage(workerWindow, 'tray-actions', { command: "backup-event", payload: {} });
+      console.log("Request Backup");
+    }
+  });
+
+  items.push({
+    label: 'Restart Server',
+    enabled: false,
+    click() {
+      // sendWindowMessage(workerWindow, 'tray-actions', { command: "server-restart", payload: {} });
+      console.log("Restart Server");
+    }
+  });
+
   items.push({ type: 'separator' });
 
   items.push({
@@ -196,20 +216,18 @@ function updateMenu() {
   const contextMenu = Menu.buildFromTemplate(items);
   tray.setContextMenu(contextMenu);
 
-  if (process.platform === 'win32') {
-    tray.on('click', tray.popUpContextMenu(contextMenu));
-  }
-
 }
 
 
 app.on('ready', createWindow);
+
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
+
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {

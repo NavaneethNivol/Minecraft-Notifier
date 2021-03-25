@@ -9,10 +9,12 @@ let message2UI = (command, payload) => {
     });
 }
 
-const socket = io.connect(`http://34.87.151.12:5000/`, {
+const socket = io.connect(`https://fendsnotification.ddns.net`, {
     reconnection: true,
     query: {
         token: "FEND13182414"
+        // token: "minecraft123"
+        // token: "minecraft"
     }
 });
 
@@ -26,6 +28,7 @@ socket.on('connect', function () {
     socket.emit('get-players', 'Get players from server');
 
     socket.on('login', function (data) {
+        
         console.log(`${data.player} Joined the game.`);
 
         var taglines = [
@@ -45,9 +48,13 @@ socket.on('connect', function () {
         });
     });
 
-    socket.on('players', function (players) {
-        console.log(`Online Players: ${players.filter(x => x.name)}`);
+    socket.on('notify', function (data) {
+        new window.Notification(data.title, {
+            body: data.body
+        });
+    });
 
+    socket.on('players', function (players) {
         message2UI('players', { players: players });
     });
 
@@ -71,7 +78,7 @@ socket.on('connect', function () {
             title = "Automatic backup has started";
             body = taglines[[Math.floor(Math.random() * taglines.length)]];
         }
-        else if(data.done && data.status == 'completed') {
+        else if (data.done && data.status == 'completed') {
             title = "Backup Completed";
             body = data.backup_name;
         }
@@ -85,6 +92,16 @@ socket.on('connect', function () {
         });
 
     });
+
+    ipcRenderer.on('tray-actions', (event, arg) => {
+        if (arg.command == "backup-event") {
+            socket.emit('manual-backup', 'Request for manual backup');
+        }
+        else if (arg.command == "server-restart") {
+            socket.emit('server-restart', 'Request for server restart');
+        }
+    });
+
 });
 
 
